@@ -1,0 +1,9 @@
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+
+{
+  "title": "Testing apps is fun",
+  "author": "Illia Boiko",
+  "url": "google.com",
+  "likes": 10
+}
