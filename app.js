@@ -1,5 +1,6 @@
 const config = require('./utils/config')
 const express = require('express')
+require('express-async-errors')
 const app = express()
 const cors = require('cors')
 const blogsRouter = require('./controllers/blogs')
@@ -22,7 +23,7 @@ mongoose.connect(config.MONGODB_URI)
   )
 
 app.use(cors())
-// here should be app.use(express.static('dist'))
+app.use(express.static('dist'))
 app.use(express.json())
 app.use(middleware.requestLogger)
 
@@ -30,10 +31,5 @@ app.use('/api/blogs', blogsRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
-
-const PORT = 3003
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
 
 module.exports = app
