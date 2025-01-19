@@ -1,4 +1,4 @@
-const { test, after, beforeEach } = require("node:test");
+const { test, after, beforeEach, describe } = require("node:test");
 const Blog = require("../models/blog");
 const mongoose = require("mongoose");
 const helper = require("./test_helper");
@@ -91,8 +91,7 @@ test("if added blog doesnt have likes value, it defaults to zero", async () => {
   assert.strictEqual(savedBlogAtEnd.likes, 0);
 });
 
-
-test('if title or url are missing, response is 400-Bad-Request', async () => {
+test("if title or url are missing, response is 400-Bad-Request", async () => {
   const newBlogObj = {
     title: "note without likes",
     author: "test",
@@ -100,13 +99,56 @@ test('if title or url are missing, response is 400-Bad-Request', async () => {
     likes: 10,
   };
 
-  await api
-    .post('/api/blogs')
-    .send(newBlogObj)
-    .expect(400)
+  await api.post("/api/blogs").send(newBlogObj).expect(400);
+});
 
-}
-)
+describe("deleting posts", () => {
+  test("deleting with valid ID is successful", async () => {
+    const blogsAtStart = await helper.blogsInDb();
+    const idToDelete = blogsAtStart[0].id;
+    await api.delete(`/api/blogs/${idToDelete}`).expect(204);
+
+    const blogsAtEnd = await helper.blogsInDb();
+    assert.strictEqual(blogsAtEnd.length, initialBlogs.length - 1);
+  });
+
+  test("deleting with invalid id returns 400 bad request", async () => {
+    const invalidID = 1;
+    await api.delete(`/api/blogs/${invalidID}`).expect(400);
+  });
+});
+
+describe("updating posts", () => {
+  test("updating ulr of the existing post", async () => {
+    const blogsAtStart = await helper.blogsInDb();
+    const blogToUpdateId = blogsAtStart[0].id;
+
+    fieldToUpdate = {
+        likes: 1000
+    }
+
+    await api
+      .put(`/api/blogs/${blogToUpdateId}`)
+      .send(fieldToUpdate)
+      .expect(200);
+
+    const blogToUpdateAtEnd = await Blog.findById(blogToUpdateId);
+    assert.strictEqual(blogToUpdateAtEnd.likes, fieldToUpdate.likes);
+  });
+
+  test("updating url of the post using invalid id", async () => {
+    const invalidID = 1;
+
+    fieldToUpdate = {
+        likes: 1000
+    }
+
+    await api
+      .put(`/api/blogs/${invalidID}`)
+      .send({ url: "new url" })
+      .expect(400);
+  });
+});
 
 after(async () => {
   await mongoose.connection.close();
