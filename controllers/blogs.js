@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken");
 const blogsRouter = require("express").Router();
 const Blog = require("../models/blog");
 const User = require("../models/user");
@@ -10,8 +11,13 @@ blogsRouter.get("/", async (request, response) => {
   response.json(blogs);
 });
 
+blogsRouter.get("/:id", async (request, response) => {
+  const blog = await Blog.findById(request.params.id);
+  response.json(blog);
+});
+
 blogsRouter.post("/", async (request, response) => {
-  const user = await User.findOne();
+  const user = await User.findById(request.user.id);
   const blog = new Blog({ ...request.body, user: user.id });
 
   const savedBlog = await blog.save();
@@ -21,17 +27,38 @@ blogsRouter.post("/", async (request, response) => {
 });
 
 blogsRouter.delete("/:id", async (request, response) => {
-  await Blog.findByIdAndDelete(request.params.id);
+  const user = request.user;
+  const deletedBlog = await Blog.findOneAndDelete({
+    _id: request.params.id,
+    user: user.id,
+  });
+
+  if (!deletedBlog) {
+    return response
+      .status(404)
+      .json({ error: "blog not found or unauthorized" });
+  }
+
   response.status(204).end();
 });
 
 blogsRouter.put("/:id", async (request, response) => {
+  const user = request.user;
+
   const updateObject = request.body;
-  const updatedBlog = await Blog.findByIdAndUpdate(
-    request.params.id,
+
+  const updatedBlog = await Blog.findOneAndUpdate(
+    { _id: request.params.id, user: user.id },
     updateObject,
     { new: true }
   );
+
+  if (!updatedBlog) {
+    return response
+      .status(404)
+      .json({ error: "blog not found or unauthorized" });
+  }
+
   response.json(updatedBlog);
 });
 
