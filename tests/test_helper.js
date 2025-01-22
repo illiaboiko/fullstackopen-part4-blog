@@ -1,5 +1,18 @@
 const Blog = require("../models/blog");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const { Types } = require("mongoose");
+const bcrypt = require("bcrypt");
+
+const usersIds = [
+  new Types.ObjectId("678fc8928b01f4ea747da11b"),
+  new Types.ObjectId("678fcf124d7eec5c4bc34b02"),
+];
+
+const userForToken = {
+  username: "root",
+  id: "678fc8928b01f4ea747da11b",
+};
 
 const initialBlogs = [
   {
@@ -9,6 +22,7 @@ const initialBlogs = [
     url: "https://reactpatterns.com/",
     likes: 7,
     __v: 0,
+    user: usersIds[0],
   },
   {
     _id: "5a422aa71b54a676234d17f8",
@@ -17,6 +31,7 @@ const initialBlogs = [
     url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
     likes: 5,
     __v: 0,
+    user: usersIds[0],
   },
   {
     _id: "5a422b3a1b54a676234d17f9",
@@ -25,6 +40,7 @@ const initialBlogs = [
     url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
     likes: 12,
     __v: 0,
+    user: usersIds[0],
   },
   {
     _id: "5a422b891b54a676234d17fa",
@@ -33,6 +49,7 @@ const initialBlogs = [
     url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
     likes: 10,
     __v: 0,
+    user: usersIds[1],
   },
   {
     _id: "5a422ba71b54a676234d17fb",
@@ -41,6 +58,7 @@ const initialBlogs = [
     url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
     likes: 0,
     __v: 0,
+    user: usersIds[1],
   },
   {
     _id: "5a422bc61b54a676234d17fc",
@@ -49,6 +67,7 @@ const initialBlogs = [
     url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
     likes: 2,
     __v: 0,
+    user: usersIds[1],
   },
 ];
 
@@ -62,8 +81,13 @@ const usersInDb = async () => {
   return users.map((user) => user.toJSON());
 };
 
+const getToken = () => {
+  return jwt.sign(userForToken, process.env.SECRET);
+};
+
 module.exports = {
   initialBlogs,
   blogsInDb,
   usersInDb,
+  getToken,
 };

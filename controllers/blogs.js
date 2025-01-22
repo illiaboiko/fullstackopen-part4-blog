@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const blogsRouter = require("express").Router();
 const Blog = require("../models/blog");
 const User = require("../models/user");
+const middleware = require("../utils/middleware");
 
 blogsRouter.get("/", async (request, response) => {
   const blogs = await Blog.find({}).populate("user", {
@@ -16,7 +17,7 @@ blogsRouter.get("/:id", async (request, response) => {
   response.json(blog);
 });
 
-blogsRouter.post("/", async (request, response) => {
+blogsRouter.post("/", middleware.userExtractor, async (request, response) => {
   const user = await User.findById(request.user.id);
   const blog = new Blog({ ...request.body, user: user.id });
 
@@ -26,7 +27,7 @@ blogsRouter.post("/", async (request, response) => {
   response.status(201).json(savedBlog);
 });
 
-blogsRouter.delete("/:id", async (request, response) => {
+blogsRouter.delete("/:id", middleware.userExtractor, async (request, response) => {
   const user = request.user;
   const deletedBlog = await Blog.findOneAndDelete({
     _id: request.params.id,
@@ -42,7 +43,7 @@ blogsRouter.delete("/:id", async (request, response) => {
   response.status(204).end();
 });
 
-blogsRouter.put("/:id", async (request, response) => {
+blogsRouter.put("/:id", middleware.userExtractor, async (request, response) => {
   const user = request.user;
 
   const updateObject = request.body;

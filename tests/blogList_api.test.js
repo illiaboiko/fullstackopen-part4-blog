@@ -13,11 +13,15 @@ const initialBlogs = helper.initialBlogs;
 
 beforeEach(async () => {
   await Blog.deleteMany({});
-
+  
   const blogObjects = initialBlogs.map((blog) => new Blog(blog));
   const savedBlogPromises = blogObjects.map((blog) => blog.save());
-
+  
   await Promise.all(savedBlogPromises);
+});
+
+after(async () => {
+  await mongoose.connection.close();
 });
 
 test("all blogs (6) are returned from the server", async () => {
@@ -150,6 +154,3 @@ describe("updating posts", () => {
   });
 });
 
-after(async () => {
-  await mongoose.connection.close();
-});
