@@ -1,1 +1,1 @@
-GET http://localhost:3003/api/blogs
+GET http://localhost:3001/api/blogs/68d07f39562d7960ccd1e1f3/comments
